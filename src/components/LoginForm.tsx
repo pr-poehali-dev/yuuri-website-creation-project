@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +12,41 @@ import {
 import Icon from "@/components/ui/icon";
 
 const LoginForm = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      // Замените на ваш webhook URL
+      const webhookUrl = "https://your-webhook-url.com/login";
+
+      const response = await fetch(webhookUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          timestamp: new Date().toISOString(),
+        }),
+      });
+
+      if (response.ok) {
+        console.log("Данные отправлены успешно");
+        // Здесь можно добавить уведомление об успехе
+      }
+    } catch (error) {
+      console.error("Ошибка отправки:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="w-full max-w-md mx-auto">
       <Card className="bg-gray-900 border-gray-800">
@@ -23,7 +59,7 @@ const LoginForm = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-gray-200">
                 Email
@@ -32,6 +68,9 @@ const LoginForm = () => {
                 id="email"
                 type="email"
                 placeholder="your@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
                 className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500 focus:border-purple-500"
               />
             </div>
@@ -52,15 +91,26 @@ const LoginForm = () => {
                 id="password"
                 type="password"
                 placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
                 className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500 focus:border-purple-500"
               />
             </div>
-          </div>
 
-          <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
-            <Icon name="LogIn" size={16} className="mr-2" />
-            Войти
-          </Button>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-50"
+            >
+              {isLoading ? (
+                <Icon name="Loader2" size={16} className="mr-2 animate-spin" />
+              ) : (
+                <Icon name="LogIn" size={16} className="mr-2" />
+              )}
+              {isLoading ? "Отправка..." : "Войти"}
+            </Button>
+          </form>
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
